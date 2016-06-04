@@ -1,0 +1,11 @@
+# depslib dependency file v1.0
+1464966438 source:c:\users\ruben\google drive\faculdade\aed2\laboratório 01-06-16\tad\fila.c
+	"fila.h"
+	<stdlib.h>
+
+1464964815 c:\users\ruben\google drive\faculdade\aed2\laboratório 01-06-16\tad\fila.h
+
+1464966106 source:c:\users\ruben\google drive\faculdade\aed2\laboratório 01-06-16\tad\usafila.c
+	<stdio.h>
+	"fila.h"
+
