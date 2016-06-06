@@ -57,7 +57,7 @@ static int Desenfileirar(TFila *f)
             d->primeiro = d->ultimo = -1;
         }
         else {
-            if (d->primeiro + 1 < TAM) {
+            if (d->primeiro + 1 < d->tamanho) {
                 d->primeiro++;
             }
             else {
@@ -77,9 +77,8 @@ static int Desenfileirar(TFila *f)
 *
 * Pós-Cond: elemento inserido na fila, se houver espaço.
 */
-static short Enfileirar(TFila *f, int elemento)
+void short Enfileirar(TFila *f, int elemento)
 {
-    short status = 1; // verdade (vai dar tudo certo)
     TDado *d = f->dado;
     if (d->primeiro == -1)
     {
@@ -91,10 +90,13 @@ static short Enfileirar(TFila *f, int elemento)
         d->ultimo = (d->ultimo + 1) % d->tamanho;
         d->fila[d->ultimo] = elemento;
     }
-    else status = 0;//falso (deu errado)
+    else {
+    	expandirFila(f);
+    	d->ultimo++;
+    	d->fila[d->ultimo] = elemento;
+    }
 
-    d->contagem += (int) status;
-    return status;
+    d->contagem++;
 }
 /**Verifica a ocupação da fila. Para uma fila criada, verifica se ela tem UM elemento, pelo menos. Caso haja elementos o status retornado é de que a fila NÃO está vazia, caso contrário tem-se a indicação de fila vazia.
 *
@@ -120,43 +122,50 @@ static short Vazia(TFila *f)
 void imprimirFila(TFila *f) {
     int i;
     TDado *d = f->dado;
-    for (i = 0; i < TAM; i++) {
+    for (i = 0; i < d->tamanho; i++) {
         printf("%d ", d->fila[i]);
     }
     printf("\n");
 }
 
-void expandirFila(TFila *f) {
-	TDado *d = (TDado*) f->dado;
-	int *v = (int*) malloc(sizeof(int) * (d->tamanho + 10));
+short expandirFila(TFila *f) {
+	TDado *d;
+	int *v;
 	int i, aux;
+	short existe = f != NULL;
 
-	if (d->primeiro < d->ultimo) {
-		for (i = d->primeiro; i <= d->ultimo; i++) {
-			v[i - d->primeiro] = d->fila[i];
+	if (existe) {
+		d = (TDado*) f->dado;
+		v = (int*) malloc(sizeof(int) * (d->tamanho + 10));
+		if (d->primeiro < d->ultimo) {
+			for (i = d->primeiro; i <= d->ultimo; i++) {
+				v[i - d->primeiro] = d->fila[i];
+			}
+
+			d->ultimo = d->ultimo - d->primeiro;
+			d->primeiro = 0;
+		}
+		else {
+			for (i = d->primeiro; i < d->tamanho; i++) {
+				v[i - d->primeiro] = d->fila[i];
+			}
+
+			aux = d->tamanho - d->primeiro;
+
+			for (i = 0; i <= d->ultimo; i++) {
+				v[aux + i] = d->fila[i];
+			}
+
+			d->primeiro = 0;
+			d->ultimo = (d->tamanho - d->primeiro) + d->ultimo + 1;
 		}
 
-		d->ultimo = d->ultimo - d->primeiro;
-		d->primeiro = 0;
+		free(d->fila);
+		d->tamanho += 10;
+		d->fila = v;
 	}
-	else {
-		for (i = d->primeiro; i < d->tamanho; i++) {
-			v[i - d->primeiro] = d->fila[i];
-		}
 
-		aux = d->tamanho - d->primeiro;
-
-		for (i = 0; i <= d->ultimo; i++) {
-			v[aux + i] = d->fila[i];
-		}
-
-		d->primeiro = 0;
-		d->ultimo = (d->tamanho - d->primeiro) + d->ultimo + 1;
-	}
-
-	free(d->fila);
-	d->tamanho += 10;
-	d->fila = v;
+	return existe;
 }
 
 TFila* criarFila()
