@@ -1,6 +1,6 @@
 typedef struct fila TFila;
 
-TFila* CriarFila();
+TFila* criarFila();
 
 void imprimirFila(TFila *f);
 

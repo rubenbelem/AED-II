@@ -3,8 +3,7 @@
 #include "fila.h"
 
 int main() {
-    int x, i;
-    TFila *f = CriarFila();
+    TFila *f = criarFila();
     f->enfileirar(f, 5);
     f->enfileirar(f, 8);
     f->enfileirar(f, 9);
@@ -29,12 +28,6 @@ int main() {
     f->enfileirar(f, 8);
     f->enfileirar(f, 9);
 
-    f->desenfileirar(f);
-    f->desenfileirar(f);
-    f->desenfileirar(f);
-    /*for (i = 1; !f->vazia(f); i++ ) {
-        printf("Elemento %d: %d\n", i, f->desenfileirar(f));
-    }*/
-
+    system("pause");
     return 0;
 }

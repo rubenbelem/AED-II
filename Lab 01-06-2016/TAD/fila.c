@@ -21,11 +21,14 @@ segue um protótipo dos códigos relacionados a manipulação de uma fila, confo
 #include <stdlib.h>
 #define NaN 0/0.
 #define TAM 5
+
 typedef struct
 {
     int primeiro;
     int ultimo;
-    int fila[TAM];
+    int contagem;
+    int tamanho;
+    int *fila;
 } TDado;
 /** Remove o primeiro elemento da fila. Para a fila passada, o primeiro elemento será removido se ele existir.
 * No caso da fila vazia, a operação não é realizada e um NaN é retornado.
@@ -36,7 +39,7 @@ typedef struct
 */
 static int Desenfileirar(TFila *f)
 {
-    int elemento, i;
+    int elemento;
     TDado *d = (TDado*) f->dado;
     if (d->primeiro == -1)
     {
@@ -46,6 +49,8 @@ static int Desenfileirar(TFila *f)
     {
         elemento = d->fila[d->primeiro];
         d->fila[d->primeiro] = 0;
+
+        d->contagem--;
 
         if (d->primeiro == d->ultimo)
         {
@@ -60,8 +65,6 @@ static int Desenfileirar(TFila *f)
             }
         }
     }
-
-    imprimirFila(f);
 
     return elemento;
 }
@@ -83,20 +86,14 @@ static short Enfileirar(TFila *f, int elemento)
         d->primeiro=d->ultimo=0;
         d->fila[d->primeiro] = elemento;
     }
-    else if ((d->ultimo + 1) % TAM != d->primeiro)
+    else if (d->contagem < d->tamanho)
     {
-        d->ultimo++;
-        d->fila[d->ultimo] = elemento;
-    }
-    else if (d->primeiro > 0)
-    {
-        printf("\nPrimeiro: %d\n", d->primeiro);
-        d->ultimo = 0;
+        d->ultimo = (d->ultimo + 1) % d->tamanho;
         d->fila[d->ultimo] = elemento;
     }
     else status = 0;//falso (deu errado)
 
-    imprimirFila(f);
+    d->contagem += (int) status;
     return status;
 }
 /**Verifica a ocupação da fila. Para uma fila criada, verifica se ela tem UM elemento, pelo menos. Caso haja elementos o status retornado é de que a fila NÃO está vazia, caso contrário tem-se a indicação de fila vazia.
@@ -123,20 +120,55 @@ static short Vazia(TFila *f)
 void imprimirFila(TFila *f) {
     int i;
     TDado *d = f->dado;
-    printf("\n");
     for (i = 0; i < TAM; i++) {
         printf("%d ", d->fila[i]);
     }
     printf("\n");
 }
 
-TFila* CriarFila()
+void expandirFila(TFila *f) {
+	TDado *d = (TDado*) f->dado;
+	int *v = (int*) malloc(sizeof(int) * (d->tamanho + 10));
+	int i, aux;
+
+	if (d->primeiro < d->ultimo) {
+		for (i = d->primeiro; i <= d->ultimo; i++) {
+			v[i - d->primeiro] = d->fila[i];
+		}
+
+		d->ultimo = d->ultimo - d->primeiro;
+		d->primeiro = 0;
+	}
+	else {
+		for (i = d->primeiro; i < d->tamanho; i++) {
+			v[i - d->primeiro] = d->fila[i];
+		}
+
+		aux = d->tamanho - d->primeiro;
+
+		for (i = 0; i <= d->ultimo; i++) {
+			v[aux + i] = d->fila[i];
+		}
+
+		d->primeiro = 0;
+		d->ultimo = (d->tamanho - d->primeiro) + d->ultimo + 1;
+	}
+
+	free(d->fila);
+	d->tamanho += 10;
+	d->fila = v;
+}
+
+TFila* criarFila()
 {
 	TFila *f = (TFila*) malloc(sizeof(TFila));
 	TDado *d = (TDado*) malloc(sizeof(TDado));
 
 	d->primeiro = -1;
 	d->ultimo = -1;
+	d->contagem = 0;
+	d->tamanho = TAM;
+	d->fila = (int*) malloc(sizeof(int) * d->tamanho);
 
 	f->desenfileirar = Desenfileirar;
 	f->enfileirar = Enfileirar;
