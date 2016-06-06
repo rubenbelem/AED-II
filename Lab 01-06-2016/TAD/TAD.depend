@@ -9,3 +9,14 @@
 	<stdio.h>
 	"fila.h"
 
+1465192151 source:c:\users\ruben\documents\github\aed-ii\lab 01-06-2016\tad\fila.c
+	"fila.h"
+	<stdlib.h>
+
+1465187230 c:\users\ruben\documents\github\aed-ii\lab 01-06-2016\tad\fila.h
+
+1465191759 source:c:\users\ruben\documents\github\aed-ii\lab 01-06-2016\tad\usafila.c
+	<stdio.h>
+	<windows.h>
+	"fila.h"
+

@@ -21,7 +21,7 @@ segue um protótipo dos códigos relacionados a manipulação de uma fila, confo
 #include <stdlib.h>
 #define NaN 0/0.
 #define TAM 5
-
+#define ALOCAR 5
 typedef struct
 {
     int primeiro;
@@ -30,6 +30,56 @@ typedef struct
     int tamanho;
     int *fila;
 } TDado;
+
+void imprimirFila(TFila *f) {
+    int i;
+    TDado *d = f->dado;
+    for (i = 0; i < d->tamanho; i++) {
+        if (i == d->primeiro) printf("p|");
+        if (i == d->ultimo) printf("u|");
+        printf("%d ", d->fila[i]);
+    }
+    printf("\n");
+}
+
+static void expandirFila(TFila *f) {
+	TDado *d;
+	int *v;
+	int i, aux;
+	short existe = f != NULL;
+
+	if (existe) {
+		d = (TDado*) f->dado;
+		v = (int*) malloc(sizeof(int) * (d->tamanho + ALOCAR));
+		if (d->primeiro < d->ultimo) {
+			for (i = d->primeiro; i <= d->ultimo; i++) {
+				v[i - d->primeiro] = d->fila[i];
+			}
+
+			d->ultimo = d->ultimo - d->primeiro;
+			d->primeiro = 0;
+		}
+		else {
+			for (i = d->primeiro; i < d->tamanho; i++) {
+				v[i - d->primeiro] = d->fila[i];
+			}
+
+			aux = d->tamanho - d->primeiro;
+
+			for (i = 0; i <= d->ultimo; i++) {
+				v[aux + i] = d->fila[i];
+			}
+
+			d->ultimo = (d->tamanho - d->primeiro) + d->ultimo;
+			d->primeiro = 0;
+		}
+
+		free(d->fila);
+		d->tamanho += ALOCAR;
+		d->fila = v;
+	}
+}
+
 /** Remove o primeiro elemento da fila. Para a fila passada, o primeiro elemento será removido se ele existir.
 * No caso da fila vazia, a operação não é realizada e um NaN é retornado.
 *
@@ -66,6 +116,7 @@ static int Desenfileirar(TFila *f)
         }
     }
 
+    imprimirFila(f);
     return elemento;
 }
 /** Insere um novo elemento na fila. Para uma fila criada
@@ -77,26 +128,35 @@ static int Desenfileirar(TFila *f)
 *
 * Pós-Cond: elemento inserido na fila, se houver espaço.
 */
-void short Enfileirar(TFila *f, int elemento)
+short Enfileirar(TFila *f, int elemento)
 {
-    TDado *d = f->dado;
-    if (d->primeiro == -1)
-    {
-        d->primeiro=d->ultimo=0;
-        d->fila[d->primeiro] = elemento;
-    }
-    else if (d->contagem < d->tamanho)
-    {
-        d->ultimo = (d->ultimo + 1) % d->tamanho;
-        d->fila[d->ultimo] = elemento;
-    }
-    else {
-    	expandirFila(f);
-    	d->ultimo++;
-    	d->fila[d->ultimo] = elemento;
+	int status = 0;
+    TDado *d;
+
+    if (f != NULL) {
+    	status = 1;
+    	d = f->dado;
+		if (d->primeiro == -1)
+		{
+			d->primeiro=d->ultimo=0;
+			d->fila[d->primeiro] = elemento;
+		}
+		else if (d->contagem < d->tamanho)
+		{
+			d->ultimo = (d->ultimo + 1) % d->tamanho;
+			d->fila[d->ultimo] = elemento;
+		}
+		else {
+			expandirFila(f);
+			d->ultimo++;
+			d->fila[d->ultimo] = elemento;
+		}
+
+		d->contagem++;
     }
 
-    d->contagem++;
+    imprimirFila(f);
+    return status;
 }
 /**Verifica a ocupação da fila. Para uma fila criada, verifica se ela tem UM elemento, pelo menos. Caso haja elementos o status retornado é de que a fila NÃO está vazia, caso contrário tem-se a indicação de fila vazia.
 *
@@ -119,54 +179,6 @@ static short Vazia(TFila *f)
 * Pós-cond: Fila criada.
 */
 
-void imprimirFila(TFila *f) {
-    int i;
-    TDado *d = f->dado;
-    for (i = 0; i < d->tamanho; i++) {
-        printf("%d ", d->fila[i]);
-    }
-    printf("\n");
-}
-
-short expandirFila(TFila *f) {
-	TDado *d;
-	int *v;
-	int i, aux;
-	short existe = f != NULL;
-
-	if (existe) {
-		d = (TDado*) f->dado;
-		v = (int*) malloc(sizeof(int) * (d->tamanho + 10));
-		if (d->primeiro < d->ultimo) {
-			for (i = d->primeiro; i <= d->ultimo; i++) {
-				v[i - d->primeiro] = d->fila[i];
-			}
-
-			d->ultimo = d->ultimo - d->primeiro;
-			d->primeiro = 0;
-		}
-		else {
-			for (i = d->primeiro; i < d->tamanho; i++) {
-				v[i - d->primeiro] = d->fila[i];
-			}
-
-			aux = d->tamanho - d->primeiro;
-
-			for (i = 0; i <= d->ultimo; i++) {
-				v[aux + i] = d->fila[i];
-			}
-
-			d->primeiro = 0;
-			d->ultimo = (d->tamanho - d->primeiro) + d->ultimo + 1;
-		}
-
-		free(d->fila);
-		d->tamanho += 10;
-		d->fila = v;
-	}
-
-	return existe;
-}
 
 TFila* criarFila()
 {
